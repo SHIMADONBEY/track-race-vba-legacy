@@ -1,0 +1,3 @@
+[submodule "vba-files/common"]
+	path = vba-files/common
+	url = git@gitlab.com:athletic-suites/core-logic.git

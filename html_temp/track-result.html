@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        html {
+            font: 9px "UD デジタル 教科書体 N-R", "ＭＳ 明朝";
+        }
+
+        /* A4縦用のベース設定 */
+        @page {
+            size: A4 portrait;
+            /* 横の場合はlandscape */
+            margin: 0mm;
+        }
+
+        /* 各要素の余白リセット */
+        * {
+            margin: 0mm;
+            padding: 0mm;
+        }
+
+        /* プレビュー用のスタイル */
+        @media screen {
+            body {
+                background: #eee;
+            }
+
+            .page {
+                background: white;
+                /* 背景を白く */
+                box-shadow: 0 0.5mm 2mm rgba(0, 0, 0, 0.3);
+                /* ドロップシャドウ */
+                margin: 5mm;
+            }
+        }
+
+        /* 印刷時の調子を整える */
+        body {
+            width: 210mm;
+            /* 用紙の横幅を改めて指定 Chrome用 */
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            line-height: 1.5em;
+        }
+
+        h1 {
+            font-size: 16px;
+        }
+
+        h2 {
+            font-size: 12px;
+        }
+
+        h3 {
+            font-size: 9px;
+        }
+
+        table,
+        tr,
+        td {
+            font-size: 7.5px;
+        }
+
+        td div {
+            min-height: 1.15rem;
+            max-height: 1.15rem;
+            overflow: hidden;
+        }
+
+        /* 印刷1ページ用のコンテンツはここで定義 */
+        .page {
+            width: 210mm;
+            /* 用紙の横幅を改めて指定 */
+            height: 296.5mm;
+            /* 高さには0.5mm余裕をもたせる */
+            page-break-after: always;
+
+            box-sizing: border-box;
+            padding: 8mm 8mm;
+            /* 用紙の余白 */
+        }
+
+        .content-area {
+            margin: 0 2rem;
+        }
+
+        .round-list-table .round-name-col {
+            width: 5rem;
+        }
+
+        .round-list-table .round-date-col {
+            width: 5rem;
+            text-align: right;
+        }
+
+        .round-list-table .round-time-col {
+            width: 3rem;
+            text-align: right;
+        }
+
+        .game-record-list-table .record-name-col {
+            width: 15rem;
+        }
+
+        .game-record-list-table .record-col {
+            width: 5rem;
+            text-align: right;
+        }
+
+        .game-record-list-table .athlete-name-col,
+        .game-record-list-table .team-name-col {
+            width: 10rem;
+            padding-left: 0.5rem;
+        }
+
+        .game-record-list-table .record-ymd-col {
+            width: 5rem;
+        }
+
+        .result-list-header>div {
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .header-area-time-table {
+            width: 30%;
+        }
+
+        .header-area-game-record>table {
+            width: 100%;
+        }
+
+        .result-list-area {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .result-list-group {
+            width: calc(50% - 10px);
+            margin: 5px 10px;
+            page-break-inside: avoid;
+        }
+
+        .wind-indicator {
+            font-size: 7.5px;
+            vertical-align: bottom;
+        }
+
+        .result-list-group:nth-child(2n + 1) {
+            margin-left: 0;
+        }
+
+        .result-list-group:nth-child(2n) {
+            margin-right: 0;
+        }
+
+        .result-list-group-header {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .result-list-table {
+            border-collapse: collapse;
+        }
+
+        .result-list-table tr td {
+            border-bottom: 0.5px solid black;
+            vertical-align: top;
+        }
+
+        .result-list-table thead {
+            border-bottom: 1px solid black;
+            vertical-align: bottom;
+        }
+
+        .result-list-table .rank-col {
+            min-width: 2rem;
+        }
+
+        .result-list-table .order-col {
+            min-width: 2rem;
+        }
+
+        .result-list-table .bib-col {
+            min-width: 3.5rem;
+        }
+
+        .result-list-table .name-col {
+            min-width: 8.5rem;
+        }
+
+        .result-list-table .team-col {
+            min-width: 8.5rem;
+        }
+
+        .result-list-table .result-col {
+            min-width: 4.5rem;
+        }
+
+        .result-list-table .qualified-col {
+            min-width: 2.0rem;
+        }
+
+        .result-list-table .comment-col {
+            min-width: 6rem;
+        }
+
+        .result-list-table tbody .rank-col {
+            text-align: right;
+        }
+
+        .result-list-table tbody .order-col {
+            text-align: right;
+        }
+
+        .result-list-table tbody .bib-col {
+            padding-right: 0.5rem;
+            text-align: right;
+        }
+
+        .result-list-table tbody .result-col {
+            text-align: right;
+            vertical-align: bottom;
+        }
+
+        .result-list-table tbody .qualified-col {
+            text-align: center;
+        }
+
+        .result-list-table .reaction-time-div {
+            font-size: 80%;
+        }
+
+        .lap-time-table {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .lap-time-table caption {
+            text-align: left;
+        }
+        
+        .lap-time-table .check-point-col {
+            text-align: right;
+            min-width: 2.5rem;
+        }
+
+        .lap-time-table .bib-col {
+            min-width: 3rem;
+            text-align: right;
+        }
+
+        .lap-time-table .athlete-name-col {
+            min-width: 8.5rem;
+        }
+
+        .lap-time-table .team-col {
+            min-width: 8.5rem;
+        }
+
+        .lap-time-table .result-col {
+            min-width: 4.5rem;
+            text-align: right;
+            vertical-align: bottom;
+        }
+
+    </style>
+    <!-- ▼ ここからの箇所は編集しないでください ▼ -->
+    <script id="json-param" type="application/json"></script>
+    <script id="reset-process" type="text/javascript">
+        window.onload = function () {
+            document.getElementById('json-param').remove();
+            document.getElementById('replace-process').remove();
+            document.getElementById('reset-process').remove();
+        };
+    </script>
+    <!-- ▲ ここまでの箇所は編集しないでください ▲ -->
+</head>
+
+<body>
+    <section class="page" page="1">
+        <div class="page-content-header">
+            <h1>
+                <span track-event__category></span><!--
+                ---><span track-event__sex>女子</span><!--
+                ---><span track-event__event-name>100mH</span><!--
+                ---><span track-event__supecification data-prefix=" (" data-suffix=" )"> (84.0cm / 8.5m) </span>
+            </h1>
+        </div>
+        <hr />
+        <div class="result-list-header top-page-only">
+            <div class="header-area-time-table">
+                <table class="round-list-table">
+                    <tr rounds__>
+                        <td class="round-name-col">
+                            <div>
+                                <span round__name>予選</span>
+                            </div>
+                        </td>
+                        <td class="round-date-col">
+                            <div>
+                                <span round__start-date-time data-format="%M月%d日">8/20</span>
+                            </div>
+                        </td>
+                        <td class="round-time-col">
+                            <div>
+                                <span round__start-date-time data-format="%h:%mm">13:50</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="header-area-game-record">
+                <table class="game-record-list-table">
+                    <tr game-records__>
+                        <td class="record-name-col">
+                            <div>
+                                <span game-record__name>日本記録</span><!--
+                                ---><span game-record__abbrebiation data-prefix=" (" data-suffix=") "> (NR) </span>        
+                            </div>
+                        </td>
+                        <td class="record-col">
+                            <div>
+                                <span game-record__record>12.73</span>
+                            </div>
+                        </td>
+                        <td class="athlete-name-col">
+                            <div>
+                                <span game-record__athlete-name>福部　真子</span>
+                            </div>
+                        </td>
+                        <td class="team-place-col">
+                            <div>
+                                <span game-record__team-place>東京</span>
+                            </div>
+                        </td>
+                        <td class="team-name-col">
+                            <div>
+                                <span game-record__team-name>日本建設工業</span>
+                            </div>
+                        </td>
+                        <td class="record-ymd-col">
+                            <div>
+                                <span game-record__record-ymd>2022</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <hr class="top-page-only" />
+        <div class="content-area">
+            <br />
+            <h2 class="top-page-only">
+                <span current-round__name>予選</span><!--
+                ---><span current-round__group-count data-prefix=" " data-suffix="組" data-greater-than="1">6組</span><!--
+                ---><span current-round__place-each-group data-prefix=" : " data-suffix="着"> : 3着</span><!--
+                ---><span current-round__addition-count data-prefix=" + "> + 6</span>
+            </h2>
+            <div class="result-list-area" />
+        </div>
+    </section>
+    <div class="dummy-page">
+        <div data-current-round-id>
+            <div class="result-list-group" groups__>
+                <div class="result-list-group-header">
+                    <div>
+                        <h3 group__group-number data-suffix="組 ">1組</h3>
+                    </div>
+                    <div class="wind-indicator" track-event__operation-wind-gauge>
+                        <span group__wind data-prefix="(風: " data-suffix=")">+1.6</span>
+                    </div>
+                </div>
+                <div class="result-list-group-body">
+                    <table class="result-list-table">
+                        <thead>
+                            <tr>
+                                <th class="rank-col">順位</th>
+                                <th class="order-col">Ord.</th>
+                                <th class="bib-col">Bib</th>
+                                <th class="name-col">選手名</th>
+                                <th class="team-col">所属団体名</th>
+                                <th class="result-col">記録</th>
+                                <th class="qualified-col">
+                                </th>
+                                <th class="comment-col">備考</th>
+                            </tr>    
+                        </thead>
+                        <tbody>
+                            <tr group__results__>
+                                <td class="rank-col">
+                                    <span group__result__rank>1</span><!--
+                                    ---><span group__result__demo-entry>OPN</span>
+                                </td>
+                                <td class="order-col">
+                                    <span group__result__order>2</span>
+                                </td>
+                                <td class="bib-col">
+                                    <div>
+                                        <span group__result__person__bib>42</span>
+                                    </div>
+                                    <div group__result__accumaltive data-prefix="(" data-suffix=")"></div>
+                                </td>
+                                <td class="name-col">
+                                    <div>
+                                        <span group__result__person__personal-name>真城　りま</span><!--
+                                        ---><span group__result__person__age data-prefix=" (" data-suffix=")">(3)</span>
+                                    </div>
+                                    <div>
+                                        <span group__result__person__personal-phonetic>MASHIRO Rima</span>
+                                    </div>
+                                </td>
+                                <td class="team-col">
+                                    <div>
+                                        <span group__result__person__team-name>山梨学院</span>
+                                    </div>
+                                    <div>
+                                        <span group__result__person__team-place>山梨</span>
+                                    </div>
+                                </td>
+                                <td class="result-col">
+                                    <div>
+                                        <span group__result__result>13.29</span>
+                                    </div>
+                                    <div class="reaction-time-div">
+                                        <span track-event__measurement-reaction-time group__result__reaction-time data-prefix="(RT: " data-suffix=")">(RT: 0.142)</span>
+                                    </div>
+                                </td>
+                                <td class="qualified-col">
+                                    <div>
+                                        <span group__result__next-qualified>Q</span><!--
+                                        ---><span group__result__advanced-next-round>qR</span>    
+                                    </div>
+                                    <div>
+                                        <span track-event__scoring-combined-events group__result__score>1081</span>
+                                    </div>
+                                </td>
+                                <td class="comment-col">
+                                    <div>
+                                        <span group__result__same-result group__result__real-result data-prefix="(" data-suffix=")">(13.287)</span>
+                                    </div>
+                                    <div>
+                                        <span group__result__not-started>DNS</span>
+                                        <span group__result__not-finished>DNF</span>
+                                        <span group__result__disqualified>DQ </span>
+                                        <span group__result__disqualified group__result__disqualified-reason data-prefix="*">*FS</span>
+                                        <span group__result__remark></span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="result-list-group-footer">
+                    <table class="lap-time-table" track-event__split-time-points>
+                        <caption>ラップタイム</caption>
+                        <tr group__split-times__>
+                            <td class="check-point-col">
+                                <span group__split-time__comment>400m</span>
+                            </td>
+                            <td class="result-col">
+                                <span group__split-time__sub-result>1:06.</span>
+                            </td>
+                            <td class="bib-col">
+                                <span group__split-time__person__bib></span>
+                            </td>
+                            <td class="athlete-name-col">
+                                <span group__split-time__person__personal-name></span><!--
+                                ---><span group__split-time__person__age data-prefix=" (" data-suffix=")"></span>
+                            </td>
+                            <td class="team-col">
+                                <span group__split-time__person__team-place data-suffix="・"></span><!--
+                                ---><span group__split-time__person__team-name></span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ▼ ここからの箇所は編集しないでください ▼ -->
+    <script id="replace-process" type="text/javascript">
+        var jsonElement = document.getElementById('json-param');
+        var paramData = JSON.parse(jsonElement.textContent);
+        console.log(paramData);
+
+        function formatDate(value, format) {
+            const dateValue = new Date(value);
+            if (isNaN(dateValue.valueOf())) {
+                return value;
+            }
+
+            const year = dateValue.getFullYear();
+            const month = dateValue.getMonth() + 1;
+            const day = dateValue.getDate();
+
+            const hour = dateValue.getHours();
+            const minute = dateValue.getMinutes();
+            const second = dateValue.getSeconds();
+
+            let formatedValue = format;
+            formatedValue = formatedValue.replace("%yyyy", year);
+            formatedValue = formatedValue.replace("%MM", ('0' + month).slice(-2));
+            formatedValue = formatedValue.replace("%M", month);
+            formatedValue = formatedValue.replace("%dd", ('0' + day).slice(-2));
+            formatedValue = formatedValue.replace("%d", day);
+            formatedValue = formatedValue.replace("%hh", ('0' + hour).slice(-2));
+            formatedValue = formatedValue.replace("%h", hour);
+            formatedValue = formatedValue.replace("%mm", ('0' + minute).slice(-2));
+            formatedValue = formatedValue.replace("%m", minute);
+            formatedValue = formatedValue.replace("%ss", ('0' + second).slice(-2));
+            formatedValue = formatedValue.replace("%s", second);
+
+            return formatedValue;
+        }
+
+        function shrinkToFit() {
+            document.querySelectorAll('td div').forEach(child => {
+                if (child.scrollHeight <= child.getBoundingClientRect().height) {
+                    return;
+                }
+
+                for (let size = 100; size > 0; size -= 5) {
+                    child.style.fontSize = size + '%';
+                    if (child.scrollHeight <= child.getBoundingClientRect().height) {
+                        // 1行に収まればここで処理終了.
+                        break;
+                    }
+                }
+                console.log(child.style.fontSize);
+            });
+        }
+
+        function replaceInnerHtml(element, elementProcess = {}) {
+            if (elementProcess.replaceValue === undefined) {
+                return;
+            }
+
+            replaceValue = elementProcess.replaceValue;
+
+            let childToWrite = '';
+            if (replaceValue != null && replaceValue !== '') {
+                const prefix = element.getAttribute('data-prefix') ?? '';
+                const suffix = element.getAttribute('data-suffix') ?? '';
+                const format = element.getAttribute('data-format');
+                if (format == null) {
+                    if (Number.isFinite(replaceValue) && elementProcess.numberFormat != null) {
+                        childToWrite = elementProcess.numberFormat.format(replaceValue)
+                    } else {
+                        childToWrite = replaceValue;
+                    }
+                } else {
+                    childToWrite = formatDate(replaceValue, format);
+                }
+                childToWrite = prefix + childToWrite + suffix;
+            }
+            element.innerHTML = childToWrite;
+        }
+
+        function writeChildText(attribute, elementProcess = {}) {
+            document.querySelectorAll("[" + attribute + "]").forEach(element => {
+                if (elementProcess.displayCondition != null) {
+                    if (elementProcess.displayCondition(element) == false) {
+                        element.remove();
+                        return;
+                    }
+                }
+
+                replaceInnerHtml(element, elementProcess);
+            });
+        }
+
+        function writeIteratedChildText(targetAttribute, parentAttributes, valueFunction, elementProcess = { replaceInner: true }) {
+            let selector = '';
+            parentAttributes.forEach((attr, i) => selector += ((i > 0 ? ' ' : '') + '[' + attr + ']'));
+
+            document.querySelectorAll(selector).forEach(parent => {
+                const indexes = parent.getAttribute('data-iteration-indexes').split(',').map(str => Number.parseInt(str));
+                value = valueFunction(indexes);
+
+                if (elementProcess.replaceInner) {
+                    elementProcess.replaceValue = value;
+                }
+
+                parent.querySelectorAll('[' + targetAttribute + ']').forEach(element => {
+                    if (elementProcess.displayCondition != null) {
+                        if (elementProcess.displayCondition(element, value) == false) {
+                            element.remove();
+                            return;
+                        }
+                    }
+                    replaceInnerHtml(element, elementProcess)
+                });
+            });
+        }
+
+        function breakPage(pageNode, ...trancationNodeClasses) {
+            pageNode.parentElement.appendChild(pageNode.cloneNode(true));
+            var allPageElements = document.getElementsByClassName('page');
+            var nextPageNode = allPageElements.item(allPageElements.length - 1);
+            
+            // トップページ要素の削除
+            Array.from(nextPageNode.getElementsByClassName('top-page-only')).forEach(element => element.remove());
+            // コピー先のごみデータ削除
+            trancationNodeClasses.forEach(trancationNodeClass => {
+                Array.from(nextPageNode.getElementsByClassName(trancationNodeClass)).forEach(trancationNode => {
+                    Array.from(trancationNode.children).forEach(child => child.remove());
+                });
+            });
+
+            nextPageNode.setAttribute('page', allPageElements.length);
+            return nextPageNode;
+        }
+
+        function moveToPage(destinationNodeClass, targetNodeClass) {
+            var currentPageNode = document.body.querySelectorAll('section.page').item(0);
+
+            Array.from(document.getElementsByClassName(destinationNodeClass)).forEach(destinationNode => {
+                Array.from(currentPageNode.getElementsByClassName(targetNodeClass)).forEach(targetNode => {
+                    var addedNode = targetNode.appendChild(destinationNode);
+                    if (currentPageNode.clientHeight >= currentPageNode.scrollHeight) {
+                        return;
+                    }
+
+                    currentPageNode = breakPage(currentPageNode, targetNodeClass)
+
+                    // 高さを超えたので、改ページ.
+                    Array.from(currentPageNode.getElementsByClassName(targetNodeClass)).forEach(nextPageNode => {
+                        nextPageNode.appendChild(addedNode.cloneNode(true));
+                    });
+
+                    // 前ページのごみを削除.
+                    addedNode.remove();
+
+                });
+            })
+        }
+
+        function putTrackEventElement(param) {
+            writeChildText('track-event__category', { replaceValue: param.category });
+            writeChildText('track-event__sex', { replaceValue: param.sex });
+            writeChildText('track-event__event-name', { replaceValue: param.event_name });
+            writeChildText('track-event__supecification', { replaceValue: param.supecification });
+            writeChildText('track-event__person-per-group', { replaceValue: param.person_per_group });
+            writeChildText('track-event__rounds-count', { replaceValue: param.rounds_count });
+            writeChildText('track-event__operation-wind-gauge', { displayCondition: element => param.operation_wind_gauge });
+            writeChildText('track-event__measurement-reaction-time', { displayCondition: element => param.measurement_reaction_time });
+            writeChildText('track-event__scoring-combined-events', { displayCondition: element => param.scoring_combined_events });
+            writeChildText('track-event__split-time-points', { displayCondition: element => param.split_time_points.length > 0 })
+
+            document.querySelectorAll('[track-event__split-time-points__]').forEach(element => {
+                const parent = element.parentElement;
+                param.split_time_points.forEach((point, i) => {
+                    const copiedElement = element.cloneNode(true);
+                    copiedElement.setAttribute('data-iteration-indexes', i);
+                    parent.appendChild(copiedElement);
+                });
+
+                element.remove();
+            });
+
+            writeIteratedChildText('split-time-point__point', ['track-event__split-time-points__'], indexes => param.split_time_points[indexes[0]]);
+        }
+
+        function putRoundsElement(param) {
+            document.querySelectorAll('[rounds__]').forEach(element => {
+                const parent = element.parentElement;
+                param.forEach((round, i) => {
+                    const copiedElement = element.cloneNode(true);
+                    copiedElement.setAttribute('data-iteration-indexes', i);
+                    copiedElement.setAttribute('round__id', round.id)
+                    parent.appendChild(copiedElement);
+                });
+
+                element.remove();
+            });
+
+            writeIteratedChildText('round__name', ['rounds__'], indexes => param[indexes[0]].name);
+            writeIteratedChildText('round__start-date-time', ['rounds__'], indexes => param[indexes[0]].start_date_time);
+            writeIteratedChildText('round__group-count', ['rounds__'], indexes => param[indexes[0]].group_count);
+            writeIteratedChildText('round__place-each-group', ['rounds__'], indexes => param[indexes[0]].place_each_group);
+            writeIteratedChildText('round__addition-count', ['rounds__'], indexes => param[indexes[0]].addition_count);
+        }
+
+        function putCurrentRoundElement(param) {
+            const qualifiersCount = param.group_count * param.place_each_group + param.addition_count;
+
+            writeChildText('current-round__name', { replaceValue: param.name });
+            writeChildText('current-round__start-date-time', { replaceValue: param.start_date_time });
+            writeChildText('current-round__group-count', {
+                replaceValue: param.group_count, displayCondition: element => {
+                    const greaterThan = Number.parseInt(element.getAttribute('data-greater-than'));
+                    if (isNaN(greaterThan)) {
+                        return true;
+                    }
+                    return param.group_count > greaterThan;
+                }
+            });
+            writeChildText('current-round__place-each-group', { replaceValue: param.place_each_group, displayCondition: element => qualifiersCount > 0 });
+            writeChildText('current-round__addition-count', { replaceValue: param.addition_count, displayCondition: element => qualifiersCount > 0 });
+
+            document.querySelectorAll('[data-current-round-id]').forEach(element => {
+                element.removeAttribute('data-current-round-id');
+                element.classList.add('current-round-id__' + param.id);
+            });
+        }
+
+        function putGameRecordsElement(param) {
+            document.querySelectorAll("[game-records__]").forEach(element => {
+                const parent = element.parentElement;
+                param.forEach((record, i) => {
+                    const copiedElement = element.cloneNode(true);
+                    copiedElement.setAttribute('data-iteration-indexes', i);
+                    parent.appendChild(copiedElement);
+                });
+
+                element.remove();
+            });
+
+            writeIteratedChildText('game-record__name', ['game-records__'], indexes => param[indexes[0]].name);
+            writeIteratedChildText('game-record__abbrebiation', ['game-records__'], indexes => param[indexes[0]].abbrebiation);
+            writeIteratedChildText('game-record__record', ['game-records__'], indexes => param[indexes[0]].record);
+            writeIteratedChildText('game-record__athlete-name', ['game-records__'], indexes => param[indexes[0]].athlete_name);
+            writeIteratedChildText('game-record__team-name', ['game-records__'], indexes => param[indexes[0]].team_name);
+            writeIteratedChildText('game-record__team-place', ['game-records__'], indexes => param[indexes[0]].team_place);
+            writeIteratedChildText('game-record__record-ymd', ['game-records__'], indexes => param[indexes[0]].recorded_ymd);
+            writeIteratedChildText('game-record__record-time-unit', ['game-records__'], indexes => param[indexes[0]].record_time_unit);
+        }
+
+        function putResultListElement(param) {
+            document.querySelectorAll("[groups__]").forEach(parent_1 => {
+                // グループのコピー
+                const parent_0 = parent_1.parentElement;
+                for (let i = 0; i < param.length; i++) {
+                    const orderList = param[i];
+
+                    const copiedElement = parent_1.cloneNode(true);
+                    copiedElement.setAttribute('data-iteration-indexes', i);
+
+                    copiedElement.querySelectorAll('[group__results__]').forEach((parent_3) => {
+                        const parent_2 = parent_3.parentElement;
+                        orderList.results.forEach((order, j) => {
+                            const clonedElement = parent_3.cloneNode(true);
+                            clonedElement.setAttribute('data-iteration-indexes', i + ',' + j);
+                            clonedElement.setAttribute('group__result__id', order.id);
+                            parent_2.appendChild(clonedElement);
+                        });
+
+                        parent_3.remove();
+                    });
+
+                    copiedElement.querySelectorAll('[group__split-times__]').forEach((parent_5) => {
+                        const parent_4 = parent_5.parentElement;
+                        orderList.split_times.forEach((splitTime, j) => {
+                            const clonedElement = parent_5.cloneNode(true);
+                            clonedElement.setAttribute('data-iteration-indexes', i + ',' + j);
+                            clonedElement.setAttribute('group__split-time__id', splitTime.id);
+                            parent_4.appendChild(clonedElement);
+                        });
+
+                        parent_5.remove();
+                    });
+
+                    parent_0.appendChild(copiedElement);
+                }
+
+                parent_1.remove();
+            });
+
+            const windFormatter = new Intl.NumberFormat('ja-JP', { style: 'decimal', signDisplay: 'exceptZero', minimumFractionDigits: 1, maximumFractionDigits: 1,  });
+            writeIteratedChildText('group__group-number', ['groups__'], indexes => param[indexes[0]].group_number, { replaceInner: true, displayCondition: (element, value) => paramData.current_round.group_count > 1 });
+            writeIteratedChildText('group__wind', ['groups__'], indexes => param[indexes[0]].wind, { replaceInner: true, numberFormat: windFormatter, displayCondition: (element, value) => Number.isFinite(value)});
+            writeIteratedChildText('group__result__group', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].group);
+            writeIteratedChildText('group__result__order', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].order);
+            writeIteratedChildText('group__result__rank', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].rank);
+            writeIteratedChildText('group__result__result', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].result);
+            writeIteratedChildText('group__result__real-result', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].real_result);
+            writeIteratedChildText('group__result__remark', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].remark);
+            writeIteratedChildText('group__result__reaction-time', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].reaction_time);
+            writeIteratedChildText('group__result__disqualified-reason', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].disqualified_reason);
+            writeIteratedChildText('group__result__advanced-next-round', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].advanced_next_round);
+            writeIteratedChildText('group__result__total-rank', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].total_rank);
+            writeIteratedChildText('group__result__same-result', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].same_result, { displayCondition: (element, value) => value > 0 });
+            writeIteratedChildText('group__result__result-rank', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].result_rank);
+            writeIteratedChildText('group__result__next-qualified', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].next_qualified);
+            writeIteratedChildText('group__result__score', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].score);
+            writeIteratedChildText('group__result__updated_at', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].updated_at);
+            writeIteratedChildText('group__result__demo-entry', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].demo_entry, { replaceInner: false, displayCondition: (element, value) => value });
+            writeIteratedChildText('group__result__accumaltive', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].accumaltive.join(', '));
+            writeIteratedChildText('group__result__not-started', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].not_started, { replaceInner: false, displayCondition: (element, value) => value });
+            writeIteratedChildText('group__result__not-finished', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].not_finished, { replaceInner: false, displayCondition: (element, value) => value });
+            writeIteratedChildText('group__result__disqualified', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].disqualified, { replaceInner: false, displayCondition: (element, value) => value });
+            writeIteratedChildText('group__result__person__id', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.id);
+            writeIteratedChildText('group__result__person__sex', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.sex);
+            writeIteratedChildText('group__result__person__bib', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.bib);
+            writeIteratedChildText('group__result__person__personal-name', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.personal_name);
+            writeIteratedChildText('group__result__person__age', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.age);
+            writeIteratedChildText('group__result__person__personal-phonetic', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.personal_phonetic);
+            writeIteratedChildText('group__result__person__personal-latin', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.personal_latin);
+            writeIteratedChildText('group__result__person__team-name', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.team_name);
+            writeIteratedChildText('group__result__person__team-place', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.team_place);
+            writeIteratedChildText('group__result__person__personal-country', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.personal_country);
+            writeIteratedChildText('group__result__person__personal-grade', ['groups__', 'group__results__'], indexes => param[indexes[0]].results[indexes[1]].person.personal_grade);
+
+            writeIteratedChildText('group__split-time__group', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].group_number);
+            writeIteratedChildText('group__split-time__order', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].order);
+            writeIteratedChildText('group__split-time__sub-number', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].sub_number);
+            writeIteratedChildText('group__split-time__sub-result', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].sub_result);
+            writeIteratedChildText('group__split-time__comment', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].comment);
+            writeIteratedChildText('group__split-time__result-id', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].result_id);
+            writeIteratedChildText('group__split-time__person__id', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.id);
+            writeIteratedChildText('group__split-time__person__sex', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.sex);
+            writeIteratedChildText('group__split-time__person__bib', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.bib);
+            writeIteratedChildText('group__split-time__person__personal-name', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.personal_name);
+            writeIteratedChildText('group__split-time__person__age', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.age);
+            writeIteratedChildText('group__split-time__person__personal-phonetic', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.personal_phonetic);
+            writeIteratedChildText('group__split-time__person__personal-latin', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.personal_latin);
+            writeIteratedChildText('group__split-time__person__team-name', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.team_name);
+            writeIteratedChildText('group__split-time__person__team-place', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.team_place);
+            writeIteratedChildText('group__split-time__person__personal-country', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.personal_country);
+            writeIteratedChildText('group__split-time__person__personal-grade', ['groups__', 'group__split-times__'], indexes => param[indexes[0]].split_times[indexes[1]].person.personal_grade);
+        }
+
+        putTrackEventElement(paramData.track_event);
+        putRoundsElement(paramData.rounds);
+
+        putGameRecordsElement(paramData.game_records)
+
+        putCurrentRoundElement(paramData.current_round);
+
+        putResultListElement(paramData.groups.items);
+
+        moveToPage('result-list-group', 'result-list-area');
+        shrinkToFit();
+
+        Array.from(document.getElementsByClassName('dummy-page')).forEach(value => value.remove());
+    </script>
+    <!-- ▲ ここまでの箇所は編集しないでください ▲ -->
+</body>
+
+</html>
